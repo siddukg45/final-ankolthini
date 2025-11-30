@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Employee Face Registration</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* layout & card */
+    body {
+      background: #000;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+      overflow-y: auto;
+    }
+
+    .btn-exit-login {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #ff4b4b, #ff2e63);
+      border: none;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      transition: 0.25s;
+    }
+
+    .btn-exit-login:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+
+
+    .card {
+      background: linear-gradient(145deg, #0b0b0b, #151515);
+      border: none;
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow: 0 8px 30px rgba(35, 34, 34, 0.7);
+      width: 100%;
+      max-width: 560px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #regTitle{
+      color: #fff;
+    }
+
+    h2 {
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    label {
+      margin-top: 12px;
+      color: #ccc;
+      font-weight: 500;
+      display: block;
+    }
+
+    .form-control {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 12px;
+      color: #fff;
+      padding: 12px 14px;
+      outline: none;
+    }
+
+    .helper-text {
+      font-size: 13px;
+      margin-top: 6px;
+      transition: color .2s;
+      color: #9aa8c3;
+    }
+
+    .helper-text.valid {
+      color: #2ecc71;
+    }
+
+    .helper-text.invalid {
+      color: #ff6b6b;
+    }
+
+    /* buttons */
+    .btn-register {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #0a84ff, #6a5cff);
+      color: #08121e;
+      margin-top: 18px;
+      transition: transform .2s ease, filter .2s ease, opacity .12s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* ✨ NEW — same hover effect as Exit button */
+    .btn-register:hover:enabled {
+      transform: scale(1.04);
+      filter: brightness(1.15);
+      cursor: pointer;
+    }
+
+    .btn-register:active {
+      transform: scale(.995);
+    }
+
+    .btn-register:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+
+    /* popup message */
+    .popup-message {
+      position: fixed;
+      bottom: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f1724;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 28px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .6);
+      font-size: 15px;
+      transition: all .45s cubic-bezier(.2, 1, .22, 1);
+      opacity: 0;
+      z-index: 2000;
+    }
+
+    .popup-message.show {
+      bottom: 36px;
+      opacity: 1;
+    }
+
+    /* subtle success indicator inside this page (if server returns HTML the full success page will be rendered instead) */
+    .mini-success {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: linear-gradient(90deg, #0f1724, #071029);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 18px;
+      color: #9fe7b5;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .mini-success .tick {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #0f1724;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(159, 231, 181, .18);
+    }
+
+    /* small tick animation (optional) */
+    .tick svg {
+      transform-origin: center;
+      transition: transform .9s cubic-bezier(.2, 1, .22, 1);
+    }
+
+    .tick.animate svg {
+      transform: rotate(40deg) translate(6px, -2px) scale(1.05);
+    }
+
+    /* small responsive */
+    @media (max-width:420px) {
+      .card {
+        padding: 24px;
+      }
+
+      .btn-register {
+        font-size: 16px;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card" role="main" aria-labelledby="regTitle">
+    <h2 id="regTitle">📸 Employee Face Registration</h2>
+
+    <!-- NOTE: We leave action blank and set it dynamically in JS based on current path (admin vs employee) -->
+    <form id="registerForm" method="post" enctype="multipart/form-data" novalidate>
+      <label for="emp_id">Employee ID</label>
+      <input type="text" class="form-control" name="emp_id" id="emp_id" required autocomplete="off"
+        placeholder="e.g. CS001">
+      <div id="idHelper" class="helper-text">Format: CS001</div>
+
+      <label for="emp_name">Employee Name</label>
+      <input type="text" class="form-control" name="emp_name" id="emp_name" required placeholder="Full name">
+      <div id="nameHelper" class="helper-text">Only letters and spaces allowed</div>
+
+      <label for="password">Password</label>
+      <input type="password" class="form-control" name="password" id="password" required>
+      <div id="pwHelper" class="helper-text">Min 6 characters</div>
+
+      <label for="confirm">Confirm Password</label>
+      <input type="password" class="form-control" name="confirm" id="confirm" required>
+      <div id="confirmHelper" class="helper-text">Must match above</div>
+
+      <label for="contact">Contact Number</label>
+      <input type="text" class="form-control" name="contact" id="contact" required placeholder="10-digit mobile">
+      <div id="contactHelper" class="helper-text">10-digit mobile number (e.g. 98xxxxxxx)</div>
+
+      <button id="registerBtn" class="btn-register" type="submit">
+        <span id="btnIcon">👤</span>
+        <span id="btnText">Register</span>
+      </button>
+      <!-- Exit to Login Page Button -->
+      <button type="button" class="btn-exit-login" onclick="window.location.href='/'">
+        ⬅️ Exit to Login Page
+      </button>
+
+    </form>
+
+    <!-- Inline success note shown quickly; full success page (server-side) will replace page when returned as HTML -->
+    <div id="inlineSuccess" class="mini-success" style="display:none">
+      <div class="tick" id="tickIcon" aria-hidden="true">
+        <!-- simple check SVG -->
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9fe7b5" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 6L9 17l-5-5"></path>
+        </svg>
+      </div>
+      <div id="inlineSuccessText">Employee registered</div>
+    </div>
+  </div>
+
+  <div id="popup" class="popup-message" role="status" aria-live="polite"></div>
+
+  <script>
+    // helper popup
+    const popup = document.getElementById('popup');
+    function showPopup(msg, timeout = 3500) {
+      popup.textContent = msg;
+      popup.classList.add('show');
+      clearTimeout(popup._t);
+      popup._t = setTimeout(() => popup.classList.remove('show'), timeout);
+    }
+
+    // elements
+    const form = document.getElementById('registerForm');
+    const registerBtn = document.getElementById('registerBtn');
+    const btnText = document.getElementById('btnText');
+    const btnIcon = document.getElementById('btnIcon');
+
+    // inline success
+    const inlineSuccess = document.getElementById('inlineSuccess');
+    const tickIcon = document.getElementById('tickIcon');
+    const inlineSuccessText = document.getElementById('inlineSuccessText');
+
+    // inputs + helpers
+    const empId = document.getElementById('emp_id'), idHelper = document.getElementById('idHelper');
+    const empName = document.getElementById('emp_name'), nameHelper = document.getElementById('nameHelper');
+    const pw = document.getElementById('password'), pwHelper = document.getElementById('pwHelper');
+    const confirm = document.getElementById('confirm'), confirmHelper = document.getElementById('confirmHelper');
+    const contact = document.getElementById('contact'), contactHelper = document.getElementById('contactHelper');
+
+    // live validation
+    empId.addEventListener('input', () => {
+      const ok = /^CS\d{3}$/.test(empId.value.trim());
+      idHelper.textContent = ok ? '✅ Correct format' : '❌ Invalid format — expected CS001';
+      idHelper.className = 'helper-text ' + (ok ? 'valid' : 'invalid');
+    });
+
+    empName.addEventListener('input', () => {
+      const ok = /^[A-Za-z ]+$/.test(empName.value.trim());
+      nameHelper.textContent = ok ? '✅ Valid name' : '❌ Only letters and spaces allowed';
+      nameHelper.className = 'helper-text ' + (ok ? 'valid' : 'invalid');
+    });
+
+    pw.addEventListener('input', () => {
+      const ok = pw.value.length >= 6;
+      pwHelper.textContent = ok ? '✅ Strong enough' : '❌ Too short';
+      pwHelper.className = 'helper-text ' + (ok ? 'valid' : 'invalid');
+      // also update confirm validity
+      checkConfirm();
+    });
+
+    confirm.addEventListener('input', checkConfirm);
+    function checkConfirm() {
+      const ok = confirm.value === pw.value && confirm.value.length > 0;
+      confirmHelper.textContent = ok ? '✅ Passwords match' : '❌ Passwords don’t match';
+      confirmHelper.className = 'helper-text ' + (ok ? 'valid' : 'invalid');
+    }
+
+    contact.addEventListener('input', () => {
+      const ok = /^[6-9]\d{9}$/.test(contact.value.trim());
+      contactHelper.textContent = ok ? '✅ Valid number' : '❌ Invalid number';
+      contactHelper.className = 'helper-text ' + (ok ? 'valid' : 'invalid');
+    });
+
+    // Decide endpoint dynamically based on current path: if admin path includes "/admin" use /admin/register
+    function getSubmitUrl() {
+      const path = window.location.pathname || '/';
+      if (path.startsWith('/admin') || path.includes('/admin')) {
+        return '/admin/register';
+      }
+      // fallback employee register route
+      return '/register';
+    }
+
+    // handle response: server may return JSON (errors) or HTML (success page). We support both.
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+
+      // client-side basic check
+      if (!/^CS\d{3}$/.test(empId.value.trim())) { showPopup('Invalid Employee ID format'); empId.focus(); return; }
+      if (!/^[A-Za-z ]+$/.test(empName.value.trim())) { showPopup('Invalid name'); empName.focus(); return; }
+      if (pw.value.length < 6) { showPopup('Password too short'); pw.focus(); return; }
+      if (confirm.value !== pw.value) { showPopup('Passwords do not match'); confirm.focus(); return; }
+      if (!/^[6-9]\d{9}$/.test(contact.value.trim())) { showPopup('Invalid mobile number'); contact.focus(); return; }
+
+      // prepare UI
+      registerBtn.disabled = true;
+      const prevText = btnText.textContent;
+      btnText.textContent = '📷 Capturing face… please wait';
+      btnIcon.textContent = '⏳';
+
+      try {
+        const url = getSubmitUrl();
+        const body = new FormData(form);
+
+        // send with fetch
+        const res = await fetch(url, {
+          method: 'POST',
+          body: body,
+          credentials: 'same-origin',
+          headers: {
+            // no content-type here because FormData sets it
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        const contentType = res.headers.get('content-type') || '';
+
+        // If JSON -> parse and show messages/errors
+        if (contentType.includes('application/json')) {
+          const js = await res.json();
+          if (js.duplicate) {
+            showPopup('🚫 ' + (js.error || 'Duplicate face detected'));
+          } else if (js.error) {
+            showPopup('⚠️ ' + js.error);
+          } else if (js.redirect) {
+            // If server instructs redirect via JSON
+            window.location.href = js.redirect;
+          } else {
+            // unknown JSON — show raw
+            showPopup('Success — but server returned JSON. Check UI.');
+          }
+        } else if (contentType.includes('text/html')) {
+          // success - server returned HTML (likely your success.html)
+          const html = await res.text();
+
+          // Show a small inline success animation first then render returned HTML
+          inlineSuccessText.textContent = `${empName.value.trim()} • ${empId.value.trim()}`;
+          inlineSuccess.style.display = 'flex';
+          // animate tick
+          tickIcon.classList.add('animate');
+          setTimeout(() => {
+            // Replace the current page with returned HTML so success page is shown
+            // document.write is acceptable here to display server HTML response
+            document.open();
+            document.write(html);
+            document.close();
+          }, 650); // small delay for animation
+        } else {
+          // Fallback: try to parse as text and show
+          const txt = await res.text();
+          // If response contains "error" or "Server error" show popup
+          if (/error/i.test(txt)) {
+            showPopup('⚠️ Server error. Try again.');
+            console.error('Unexpected server response:', txt);
+          } else {
+            // render HTML fallback
+            document.open();
+            document.write(txt);
+            document.close();
+          }
+        }
+
+      } catch (err) {
+        console.error('Register fetch error', err);
+        showPopup('⚠️ Server error. Try again.');
+      } finally {
+        // restore UI if still on the same page
+        if (!document.hidden && document.getElementById('registerForm')) {
+          registerBtn.disabled = false;
+          btnText.textContent = prevText;
+          btnIcon.textContent = '👤';
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

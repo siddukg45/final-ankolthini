@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Registration Successful</title>
+  <meta charset="UTF-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .box {
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(145deg, #111, #1b1b1b);
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+      width: 430px;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SVG Tick animation */
+    .tick-container {
+      width: 130px;
+      height: 130px;
+      margin: 0 auto 20px auto;
+      position: relative;
+    }
+
+    svg {
+      width: 130px;
+      height: 130px;
+    }
+
+    .circle {
+      stroke: #0f0;
+      stroke-width: 6;
+      fill: none;
+      stroke-dasharray: 440;
+      stroke-dashoffset: 440;
+      animation: circle-draw 1.2s ease forwards;
+    }
+
+    @keyframes circle-draw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    .tick {
+      stroke: #0f0;
+      stroke-width: 6;
+      fill: none;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: tick-draw 0.6s ease forwards;
+      animation-delay: 1s;
+    }
+
+    @keyframes tick-draw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Glow Pulse */
+    .pulse {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(0, 255, 0, 0.2);
+      filter: blur(30px);
+      opacity: 0;
+      animation: pulse 2.4s ease-out infinite;
+      animation-delay: 1.3s;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.7); opacity: 0.6; }
+      70% { transform: scale(1.3); opacity: 0; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    h2 {
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .emp-id {
+      font-size: 22px;
+      margin-top: -5px;
+      color: #0f0;
+      font-weight: 600;
+    }
+
+    .btn-custom {
+      width: 100%;
+      padding: 12px;
+      margin-top: 18px;
+      font-size: 17px;
+      border-radius: 12px;
+      border: none;
+      transition: 0.2s;
+      font-weight: 600;
+    }
+
+    .btn-primary-custom {
+      background: #0071e3;
+    }
+
+    .btn-primary-custom:hover {
+      transform: scale(1.05);
+      background: #0a84ff;
+    }
+
+    .btn-secondary-custom {
+      background: #444;
+    }
+
+    .btn-secondary-custom:hover {
+      transform: scale(1.05);
+      background: #666;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <div class="tick-container">
+      <div class="pulse"></div>
+
+      <svg viewBox="0 0 120 120">
+        <circle class="circle" cx="60" cy="60" r="50" />
+        <path class="tick" d="M35 62 L52 78 L85 42" />
+      </svg>
+    </div>
+
+    <h2>Employee Registered Successfully</h2>
+    <div class="emp-id">{{ emp_id }}</div>
+
+    <button class="btn-custom btn-primary-custom" onclick="window.location='/admin/register'">
+      ➕ Register New Employee
+    </button>
+
+    <button class="btn-custom btn-secondary-custom" onclick="window.location='/'">
+      🔙 Back to Login Page
+    </button>
+  </div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Login as • FaceAttend</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #060b1e, #08142e);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-family: "Segoe UI", Roboto, sans-serif;
+    }
+
+    .card-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 40px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    h2 {
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+
+    .role-btn {
+      width: 100%;
+      padding: 15px;
+      margin: 12px 0;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      border: none;
+      transition: 0.25s;
+    }
+
+    .admin-btn {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      color: white;
+    }
+
+    .admin-btn:hover {
+      background: linear-gradient(90deg, #2563eb, #7c3aed);
+      transform: translateY(-3px);
+    }
+
+    .emp-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .emp-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card-box">
+    <h2>Login as</h2>
+
+    <button class="role-btn admin-btn" onclick="window.location='/admin_login'">
+      Admin
+    </button>
+
+
+    <button class="role-btn emp-btn" onclick="window.location='/login'">
+      Employee
+    </button>
+  </div>
+
+</body>
+
+</html>

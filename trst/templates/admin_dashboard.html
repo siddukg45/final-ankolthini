@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>FaceAttend • Admin</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #071426;
+      --card: #0f1a2a;
+      --muted: #9aa8c3;
+      --accent1: #4aa3ff;
+      --accent2: #8a5bff;
+      --glass: rgba(255, 255, 255, 0.03);
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, #071826 0%, #071021 100%);
+      color: #dfe9f2;
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 20px;
+      color: #eaf3ff;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-ghost {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      color: #dfe9f2;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 8px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 40px rgba(2, 6, 23, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: transparent;
+      color: var(--muted);
+      outline: none;
+    }
+
+    .employee-list {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .employee-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent);
+      border: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    .emp-id {
+      font-weight: 700;
+      color: #e8f6ff;
+    }
+
+    .emp-name {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .view-btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: transparent;
+      color: #fff;
+    }
+
+    .attendance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .attendance-table th,
+    .attendance-table td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.02);
+    }
+
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .status-present {
+      background: rgba(0, 128, 0, 0.2);
+      color: #5aff6e;
+    }
+
+    .status-absent {
+      background: rgba(255, 0, 0, 0.2);
+      color: #ff6b6b;
+    }
+
+    .status-halfday {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffd54f;
+    }
+
+    @media(max-width:980px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="brand">FaceAttend • Admin</div>
+    <div class="top-actions">
+      <a class="btn-ghost fancy-hover" id="btnRegister" href="/admin/register">Register Employee</a>
+      <a class="btn-ghost fancy-hover" id="btnLogout" href="/admin_logout">Logout</a>
+    </div>
+  </div>
+
+  <main class="grid">
+    <div>
+      <!-- ✅ Only one main search card retained -->
+      <div class="card">
+        <div>
+          <div style="font-weight:700;font-size:18px;color:#fff;">Quick Search</div>
+          <div style="color:#9aa8c3;font-size:13px;">Search for an employee to view attendance</div>
+        </div>
+        <div style="margin-top:14px;" class="search-box">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input id="searchInput" placeholder="Enter employee ID (e.g. CS001)" />
+            <button id="searchBtn" class="btn-ghost" style="padding:8px 12px;font-size:14px;">Search</button>
+          </div>
+        </div>
+        <div class="employee-list" id="employeeList" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-weight:700;font-size:16px;color:#fff;">Attendance Viewer</div>
+            <div style="font-size:13px;color:#9aa8c3;">Search an employee to show attendance below</div>
+          </div>
+          <button id="downloadBtn" class="btn-ghost" disabled>Download</button>
+        </div>
+
+        <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+          <label style="font-size:13px;color:#9aa8c3;">From</label>
+          <input type="date" id="startDate" />
+          <label style="font-size:13px;color:#9aa8c3;">To</label>
+          <input type="date" id="endDate" />
+          <button id="reloadBtn" class="btn-ghost">Reload</button>
+        </div>
+
+        <div style="margin-top:12px;">
+          <canvas id="attendanceChart" style="width:100%;height:220px;"></canvas>
+        </div>
+
+        <div style="margin-top:18px;overflow:auto;max-height:300px;">
+          <table class="attendance-table" id="attendanceTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>In1</th>
+                <th>Out1</th>
+                <th>In2</th>
+                <th>Out2</th>
+                <th>Total Hours</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const apiEmployees = '/admin/employees';
+    const apiAttendanceBase = '/admin/attendance/';
+    const apiDownloadBase = '/admin/download/';
+
+    let employees = [], currentEmp = null, chart = null;
+    const employeeList = document.getElementById('employeeList');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const attendanceTableBody = document.querySelector('#attendanceTable tbody');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    function initDates() {
+      const today = new Date(), prior = new Date();
+      prior.setDate(today.getDate() - 6);
+      startDateInput.value = prior.toISOString().slice(0, 10);
+      endDateInput.value = today.toISOString().slice(0, 10);
+    }
+    initDates();
+
+    async function loadEmployees() {
+      const res = await fetch(apiEmployees, { credentials: 'same-origin' });
+      employees = await res.json();
+      renderEmployeeList();
+    }
+
+    function renderEmployeeList() {
+      employeeList.innerHTML = '';
+      if (!employees.length) { employeeList.innerHTML = '<div class="small-muted">No employees found</div>'; return; }
+      employees.forEach(emp => {
+        const div = document.createElement('div');
+        div.className = 'employee-item';
+        div.innerHTML = `<div><div class="emp-id">${emp.id}</div><div class="emp-name">${emp.name}</div></div><button class="view-btn" data-id="${emp.id}">View</button>`;
+        employeeList.appendChild(div);
+      });
+      document.querySelectorAll('.view-btn').forEach(b => b.onclick = e => loadAttendanceFor(e.target.dataset.id));
+    }
+
+    searchBtn.onclick = () => {
+      const q = (searchInput.value || '').trim().toUpperCase();
+      if (!q) return showPopup('Enter employee ID');
+      const found = employees.find(x => x.id.toUpperCase() === q);
+      if (!found) return showPopup('Employee not found');
+      loadAttendanceFor(found.id);
+    };
+
+    async function loadAttendanceFor(empId) {
+      currentEmp = empId; downloadBtn.disabled = true;
+      const start = startDateInput.value, end = endDateInput.value;
+      const res = await fetch(`${apiAttendanceBase}${empId}?start=${start}&end=${end}`, { credentials: 'same-origin' });
+      const js = await res.json();
+      renderTable(js.rows || []); renderChart(js.rows || []);
+      downloadBtn.disabled = false;
+    }
+
+    function renderTable(rows) {
+      attendanceTableBody.innerHTML = '';
+      if (!rows.length) { attendanceTableBody.innerHTML = '<tr><td colspan="7">No attendance</td></tr>'; return; }
+      rows.forEach(r => {
+        let status = 'Absent';
+        if ((r.in1 || r.out1) && (r.in2 || r.out2)) status = 'Present';
+        else if (r.in1 || r.out1 || r.in2 || r.out2) status = 'Half-day';
+        const cls = status === 'Present' ? 'status-present' : status === 'Half-day' ? 'status-halfday' : 'status-absent';
+        attendanceTableBody.innerHTML += `
+        <tr>
+          <td>${r.date}</td><td>${r.in1 || '-'}</td><td>${r.out1 || '-'}</td>
+          <td>${r.in2 || '-'}</td><td>${r.out2 || '-'}</td>
+          <td>${r.present_hours?.toFixed(2) || '0.00'}</td>
+          <td><span class="status-badge ${cls}">${status}</span></td>
+        </tr>`;
+      });
+    }
+
+    function renderChart(rows) {
+      const labels = rows.map(r => r.date).reverse();
+      const data = rows.map(r => Number(r.present_hours || 0)).reverse();
+      const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+      // Alternate bar colors: blue and purple shades
+      const colors = data.map((_, i) =>
+        i % 2 === 0 ? 'rgba(74,163,255,0.9)' : 'rgba(138,91,255,0.9)'
+      );
+
+      if (chart) {
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = data;
+        chart.data.datasets[0].backgroundColor = colors;
+        chart.update();
+        return;
+      }
+
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: colors,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255,255,255,0.05)' },
+              ticks: { color: '#a8b7d4' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#a8b7d4' }
+            }
+          },
+          plugins: { legend: { display: false } },
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+
+    reloadBtn.onclick = () => { if (!currentEmp) return showPopup('Select employee'); loadAttendanceFor(currentEmp) };
+    downloadBtn.onclick = () => {
+      if (!currentEmp) return showPopup('Select employee');
+      const emp = employees.find(e => e.id === currentEmp);
+      const url = `${apiDownloadBase}${currentEmp}?start=${startDateInput.value}&end=${endDateInput.value}&name=${encodeURIComponent(emp?.name || '')}`;
+      window.location.href = url;
+    };
+
+    function showPopup(msg) {
+      const d = document.createElement('div');
+      d.textContent = msg;
+      d.style.position = 'fixed'; d.style.bottom = '36px'; d.style.left = '50%'; d.style.transform = 'translateX(-50%)';
+      d.style.background = 'rgba(7,20,36,0.95)'; d.style.color = '#fff'; d.style.padding = '10px 14px'; d.style.borderRadius = '18px';
+      document.body.appendChild(d); setTimeout(() => d.remove(), 2500);
+    }
+
+    loadEmployees();
+  </script>
+</body>
+
+</html>
