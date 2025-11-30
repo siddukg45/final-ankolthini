@@ -1,0 +1,27 @@
+# Ignore Python virtual environment
+venv/
+.venv/
+
+# Ignore VS Code settings
+.vscode/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Environment variables
+.env
+*.env
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
