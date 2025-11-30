@@ -208,14 +208,18 @@ def notify_student(emp_id, event, time_str):
     print(f"[WHATSAPP] {emp_id} → {masked} → sent={status}")
 
 def mark_attendance(emp_id):
-    today = now_local().date()
-    ts = now_local().strftime("%H:%M:%S")
-    t = now_local().time()
+    now = now_local()
+    today = now.date()
+    ts = now.strftime("%H:%M:%S")
+    t = now.time()
 
     att_id, in1, out1, in2, out2 = ensure_attendance_row(emp_id, today)
 
-    if t < datetime.time(13, 45):
+    LUNCH_OUT = datetime.time(13, 45)
+    LUNCH_IN  = datetime.time(14, 30)
 
+    # --- CASE 1: MORNING SESSION ---
+    if t < LUNCH_OUT:
         if in1 is None:
             update_field(att_id, "in1", ts)
             notify_student(emp_id, "IN1", ts)
@@ -226,17 +230,65 @@ def mark_attendance(emp_id):
             notify_student(emp_id, "OUT1", ts)
             print(f"[OUT1] {emp_id} logged out at {ts}")
 
+        return
+
+    # --- CASE 2: AFTERNOON SESSION (t >= 13:45) ---
+    # SPECIAL CASE: Person never logged OUT1 & never logged IN2
+    if out1 is None and in1 is not None and in2 is None:
+        # Auto-fill the missing values
+        update_field(att_id, "out1", LUNCH_OUT.strftime("%H:%M:%S"))
+        update_field(att_id, "in2",  LUNCH_IN.strftime("%H:%M:%S"))
+
+        print(f"[AUTO] Filled OUT1={LUNCH_OUT}, IN2={LUNCH_IN} for {emp_id}")
+
+        # Now continue to treat this as a normal OUT2 event
+        update_field(att_id, "out2", ts)
+        notify_student(emp_id, "OUT2", ts)
+        print(f"[OUT2] {emp_id} logged out at {ts}")
+        return
+
+    # --- NORMAL AFTERNOON BEHAVIOR ---
+    if in2 is None:
+        update_field(att_id, "in2", ts)
+        notify_student(emp_id, "IN2", ts)
+        print(f"[IN2]  {emp_id} logged in at {ts}")
+
     else:
+        update_field(att_id, "out2", ts)
+        notify_student(emp_id, "OUT2", ts)
+        print(f"[OUT2] {emp_id} logged out at {ts}")
 
-        if in2 is None:
-            update_field(att_id, "in2", ts)
-            notify_student(emp_id, "IN2", ts)
-            print(f"[IN2]  {emp_id} logged in at {ts}")
 
-        else:
-            update_field(att_id, "out2", ts)
-            notify_student(emp_id, "OUT2", ts)
-            print(f"[OUT2] {emp_id} logged out at {ts}")
+# def mark_attendance(emp_id):
+#     today = now_local().date()
+#     ts = now_local().strftime("%H:%M:%S")
+#     t = now_local().time()
+
+#     att_id, in1, out1, in2, out2 = ensure_attendance_row(emp_id, today)
+
+#     if t < datetime.time(13, 45):
+
+#         if in1 is None:
+#             update_field(att_id, "in1", ts)
+#             notify_student(emp_id, "IN1", ts)
+#             print(f"[IN1]  {emp_id} logged in at {ts}")
+
+#         else:
+#             update_field(att_id, "out1", ts)
+#             notify_student(emp_id, "OUT1", ts)
+#             print(f"[OUT1] {emp_id} logged out at {ts}")
+
+#     else:
+
+#         if in2 is None:
+#             update_field(att_id, "in2", ts)
+#             notify_student(emp_id, "IN2", ts)
+#             print(f"[IN2]  {emp_id} logged in at {ts}")
+
+#         else:
+#             update_field(att_id, "out2", ts)
+#             notify_student(emp_id, "OUT2", ts)
+#             print(f"[OUT2] {emp_id} logged out at {ts}")
 
 
 # ==============================================================  

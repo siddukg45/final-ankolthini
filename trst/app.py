@@ -21,11 +21,18 @@ from keras_facenet import FaceNet
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET", "replace_this_with_strong_secret")
 
+# DB_CONFIG = {
+#     "host": "localhost",
+#     "user": "root",
+#     "password": "siddu@8276",
+#     "database": "CSE"
+# }
+
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "siddu@8276",
-    "database": "CSE"
+    "password": "Tejas@sql1",
+    "database": "face_db"
 }
 
 def get_db_conn():
