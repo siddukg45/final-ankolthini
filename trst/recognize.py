@@ -16,7 +16,7 @@ from twilio.rest import Client
 # ---------------- CONFIG ----------------
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "siddu@8276"
+MYSQL_PASSWORD = "Tejas@sql1"
 MYSQL_DB = "CSE"
 
 EMBED_THRESHOLD = 0.60
@@ -207,56 +207,136 @@ def notify_student(emp_id, event, time_str):
 
     print(f"[WHATSAPP] {emp_id} → {masked} → sent={status}")
 
+# def mark_attendance(emp_id):
+    # now = now_local()
+    # today = now.date()
+    # ts = now.strftime("%H:%M:%S")
+    # t = now.time()
+
+    # att_id, in1, out1, in2, out2 = ensure_attendance_row(emp_id, today)
+
+    # LUNCH_OUT = datetime.time(13, 45)
+    # LUNCH_IN  = datetime.time(14, 30)
+
+    # # --- CASE 1: MORNING SESSION ---
+    # if t < LUNCH_OUT:
+    #     if in1 is None: 
+    #         update_field(att_id, "in1", ts)
+    #         notify_student(emp_id, "IN1", ts)
+    #         print(f"[IN1]  {emp_id} logged in at {ts}")
+
+    #     else:
+    #         update_field(att_id, "out1", ts)
+    #         notify_student(emp_id, "OUT1", ts)
+    #         print(f"[OUT1] {emp_id} logged out at {ts}")
+
+    #     return
+
+    # # --- CASE 2: AFTERNOON SESSION (t >= 13:45) ---
+    # # SPECIAL CASE: Person never logged OUT1 & never logged IN2
+    # if out1 is None and in1 is not None and in2 is None:
+    #     # Auto-fill the missing values
+    #     update_field(att_id, "out1", LUNCH_OUT.strftime("%H:%M:%S"))
+    #     update_field(att_id, "in2",  LUNCH_IN.strftime("%H:%M:%S"))
+
+    #     print(f"[AUTO] Filled OUT1={LUNCH_OUT}, IN2={LUNCH_IN} for {emp_id}")
+
+    #     # Now continue to treat this as a normal OUT2 event
+    #     update_field(att_id, "out2", ts)
+    #     notify_student(emp_id, "OUT2", ts)
+    #     print(f"[OUT2] {emp_id} logged out at {ts}")
+    #     return
+
+    # # --- NORMAL AFTERNOON BEHAVIOR ---
+    # if in2 is None:
+    #     update_field(att_id, "in2", ts)
+    #     notify_student(emp_id, "IN2", ts)
+    #     print(f"[IN2]  {emp_id} logged in at {ts}")
+
+    # else:
+    #     update_field(att_id, "out2", ts)
+    #     notify_student(emp_id, "OUT2", ts)
+    #     print(f"[OUT2] {emp_id} logged out at {ts}")
 def mark_attendance(emp_id):
     now = now_local()
-    today = now.date()
-    ts = now.strftime("%H:%M:%S")
     t = now.time()
+    ts = now.strftime("%H:%M:%S")
+    today = now.date()
 
     att_id, in1, out1, in2, out2 = ensure_attendance_row(emp_id, today)
 
-    LUNCH_OUT = datetime.time(13, 45)
-    LUNCH_IN  = datetime.time(14, 30)
+    # Time boundaries
+    MORNING_START = datetime.time(8, 0)
+    MORNING_END   = datetime.time(13, 45)
 
-    # --- CASE 1: MORNING SESSION ---
-    if t < LUNCH_OUT:
+    LUNCH_START   = datetime.time(13, 46)
+    LUNCH_END     = datetime.time(13, 59)
+
+    AFTERNOON_START = datetime.time(14, 0)
+    AFTERNOON_END   = datetime.time(18, 0)
+
+    # ------------------------------
+    # MORNING SESSION (08:00–13:45)
+    # ------------------------------
+    if MORNING_START <= t <= MORNING_END:
+
         if in1 is None:
             update_field(att_id, "in1", ts)
             notify_student(emp_id, "IN1", ts)
             print(f"[IN1]  {emp_id} logged in at {ts}")
-
         else:
-            update_field(att_id, "out1", ts)
+            update_field(att_id, "out1", ts)  # OUT1 keeps updating
             notify_student(emp_id, "OUT1", ts)
             print(f"[OUT1] {emp_id} logged out at {ts}")
 
         return
 
-    # --- CASE 2: AFTERNOON SESSION (t >= 13:45) ---
-    # SPECIAL CASE: Person never logged OUT1 & never logged IN2
-    if out1 is None and in1 is not None and in2 is None:
-        # Auto-fill the missing values
-        update_field(att_id, "out1", LUNCH_OUT.strftime("%H:%M:%S"))
-        update_field(att_id, "in2",  LUNCH_IN.strftime("%H:%M:%S"))
+    # ------------------------------
+    # LUNCH BREAK (13:46–13:59)
+    # ------------------------------
+    if LUNCH_START <= t <= LUNCH_END:
 
-        print(f"[AUTO] Filled OUT1={LUNCH_OUT}, IN2={LUNCH_IN} for {emp_id}")
+        # Automatically close morning if needed
+        if in1 is not None and out1 is None:
+            update_field(att_id, "out1", MORNING_END.strftime("%H:%M:%S"))
+            print(f"[AUTO] OUT1 set to 13:45 for {emp_id}")
 
-        # Now continue to treat this as a normal OUT2 event
-        update_field(att_id, "out2", ts)
-        notify_student(emp_id, "OUT2", ts)
-        print(f"[OUT2] {emp_id} logged out at {ts}")
+        print(f"[LUNCH] Tap ignored for {emp_id} at {ts}")
         return
 
-    # --- NORMAL AFTERNOON BEHAVIOR ---
-    if in2 is None:
-        update_field(att_id, "in2", ts)
-        notify_student(emp_id, "IN2", ts)
-        print(f"[IN2]  {emp_id} logged in at {ts}")
+    # ------------------------------
+    # AFTERNOON SESSION (14:00–18:00)
+    # ------------------------------
+    if AFTERNOON_START <= t <= AFTERNOON_END:
 
-    else:
-        update_field(att_id, "out2", ts)
-        notify_student(emp_id, "OUT2", ts)
-        print(f"[OUT2] {emp_id} logged out at {ts}")
+        # Auto close missing OUT1 if morning was incomplete
+        if in1 is not None and out1 is None:
+            update_field(att_id, "out1", MORNING_END.strftime("%H:%M:%S"))
+            print(f"[AUTO] OUT1 fixed at 13:45 for {emp_id}")
+
+        # IN2 should only happen once
+        if in2 is None:
+            update_field(att_id, "in2", ts)
+            notify_student(emp_id, "IN2", ts)
+            print(f"[IN2] {emp_id} logged in at {ts}")
+            return
+
+        # Strict rule: OUT2 allowed ONLY if IN2 exists
+        if in2 is not None:
+            update_field(att_id, "out2", ts)
+            notify_student(emp_id, "OUT2", ts)
+            print(f"[OUT2] {emp_id} logged out at {ts}")
+            return
+
+        # Fallback (should never hit)
+        print(f"[IGNORED] Unexpected tap by {emp_id} at {ts}")
+        return
+
+    # ------------------------------
+    # INVALID TIME (Before 8AM or After 6PM)
+    # ------------------------------
+    print(f"[INVALID] {emp_id} tapped at invalid time {ts}")
+    return
 
 
 # def mark_attendance(emp_id):
@@ -300,7 +380,7 @@ last_seen = {}
 
 # -------- CAMERA THREAD --------
 def camera_thread():
-    cap = cv2.VideoCapture("rtsp://10.154.79.119:1945/")
+    cap = cv2.VideoCapture("rtsp://10.254.194.20:1945/")
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 0)
 
     while True:

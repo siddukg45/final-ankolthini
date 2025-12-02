@@ -32,7 +32,7 @@ DB_CONFIG = {
     "host": "localhost",
     "user": "root",
     "password": "Tejas@sql1",
-    "database": "face_db"
+    "database": "CSE"
 }
 
 def get_db_conn():
@@ -545,7 +545,7 @@ def dashboard():
 from twilio.rest import Client
 
 TWILIO_SID = "AC6f8a011f27b34f08f88a00f380d9c54d"
-TWILIO_AUTH_TOKEN = "7824ebc957a4075e31f5ec8bf86a4a67"
+TWILIO_AUTH_TOKEN = "d18648b457ac349878701038c1c5cd9a"
 TWILIO_SMS_FROM = "+13135133191"
 
 def send_otp_sms(phone_number, otp):
